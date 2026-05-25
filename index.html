@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Острів ГУР — Костя Кучерук</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#07090d;color:#e8e4d8;font-family:system-ui,-apple-system,sans-serif}
+
+/* ── BG ── */
+.bg{position:fixed;inset:0;z-index:0}
+.bg-color{position:absolute;inset:0;background:#07090d}
+.bg-glow{
+  position:absolute;inset:0;
+  transition:opacity 1.2s ease;
+}
+.bg-glow.s0{background:radial-gradient(ellipse 60% 70% at 75% 50%,rgba(200,168,75,.13) 0%,transparent 65%),radial-gradient(ellipse 40% 50% at 10% 70%,rgba(160,30,30,.09) 0%,transparent 60%)}
+.bg-glow.s1{background:radial-gradient(ellipse 55% 65% at 20% 50%,rgba(40,80,160,.12) 0%,transparent 65%),radial-gradient(ellipse 50% 50% at 80% 30%,rgba(200,168,75,.10) 0%,transparent 60%)}
+.bg-glow.s2{background:radial-gradient(ellipse 70% 60% at 50% 80%,rgba(160,30,30,.12) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 80% 20%,rgba(200,168,75,.08) 0%,transparent 55%)}
+.bg-glow.s3{background:radial-gradient(ellipse 60% 70% at 50% 40%,rgba(200,168,75,.15) 0%,transparent 65%)}
+.bg-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(200,168,75,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,75,.035) 1px,transparent 1px);
+  background-size:55px 55px;
+}
+
+/* ── SLIDES CONTAINER ── */
+.slides{position:relative;z-index:1;height:100vh;width:100%}
+.slide{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 7vw;
+  opacity:0;pointer-events:none;
+  transition:opacity .05s;
+}
+.slide.active{opacity:1;pointer-events:all}
+
+/* ── NAV DOTS ── */
+.dots{
+  position:fixed;right:28px;top:50%;transform:translateY(-50%);
+  z-index:10;display:flex;flex-direction:column;gap:10px;
+}
+.dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(200,168,75,.3);border:none;cursor:pointer;
+  transition:background .4s,transform .4s;padding:0;
+}
+.dot.on{background:#c8a84b;transform:scale(1.5)}
+
+/* ── PROGRESS BAR ── */
+.progress{
+  position:fixed;bottom:0;left:0;right:0;height:2px;z-index:10;
+  background:rgba(200,168,75,.1);
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,#c8a84b,#f0d070);
+  transition:width .6s cubic-bezier(.16,1,.3,1);
+}
+
+/* ── SLIDE NUMBER ── */
+.slide-num{
+  position:fixed;left:28px;bottom:28px;z-index:10;
+  font-size:.6rem;letter-spacing:.25em;color:rgba(200,168,75,.4);
+}
+
+/* ── ARROWS ── */
+.arrow{
+  position:fixed;bottom:28px;right:60px;z-index:10;
+  display:flex;gap:12px;
+}
+.arr-btn{
+  width:40px;height:40px;border:1px solid rgba(200,168,75,.25);
+  background:transparent;color:#c8a84b;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.arr-btn:hover{background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.5)}
+
+/* ═══════════════════════════════
+   SLIDE 0 — HERO
+═══════════════════════════════ */
+.s0-inner{
+  display:flex;align-items:center;
+  gap:6vw;max-width:920px;width:100%;
+}
+
+.s0-left{flex:1}
+.s0-right{flex-shrink:0}
+
+/* text blocks animation — triggered by .active */
+.slide.active .anim{animation-play-state:running !important}
+.anim{animation-play-state:paused}
+
+.a-eyebrow{animation:up .7s .0s cubic-bezier(.16,1,.3,1) both paused}
+.a-who    {animation:up .7s .1s cubic-bezier(.16,1,.3,1) both paused}
+.a-h1     {animation:up .7s .2s cubic-bezier(.16,1,.3,1) both paused}
+.a-sub    {animation:up .7s .35s cubic-bezier(.16,1,.3,1) both paused}
+.a-line   {animation:lineGrow .9s .45s cubic-bezier(.16,1,.3,1) both paused}
+.a-desc   {animation:up .7s .5s cubic-bezier(.16,1,.3,1) both paused}
+.a-btn    {animation:up .7s .65s cubic-bezier(.16,1,.3,1) both paused}
+.a-book   {animation:bookIn 1s .1s cubic-bezier(.16,1,.3,1) both paused}
+
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes lineGrow{from{width:0;opacity:0}to{width:44px;opacity:1}}
+@keyframes bookIn{from{opacity:0;transform:translateX(50px) rotateY(-20deg)}to{opacity:1;transform:none}}
+
+/* eyebrow */
+.eyebrow{
+  font-size:.58rem;letter-spacing:.35em;text-transform:uppercase;
+  color:#c8a84b;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:'';width:26px;height:1px;background:#c8a84b;flex-shrink:0}
+
+.who{font-size:.72rem;font-weight:300;letter-spacing:.07em;color:rgba(232,228,216,.38);margin-bottom:10px}
+
+h1{font-size:clamp(2.4rem,5.5vw,3.8rem);font-weight:900;line-height:.98;letter-spacing:-.02em;margin-bottom:4px}
+h1 .gold{
+  display:block;
+  background:linear-gradient(100deg,#c8a84b 20%,#f5df88);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sub-tag{font-size:.65rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(232,228,216,.28);margin-bottom:26px}
+
+.divider{height:2px;background:linear-gradient(90deg,#c8a84b,transparent);margin-bottom:22px}
+
+.desc{font-size:.9rem;line-height:1.88;color:rgba(232,228,216,.58);max-width:400px;margin-bottom:34px}
+
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;color:#07090d;background:#c8a84b;
+  padding:15px 30px;position:relative;overflow:hidden;
+  transition:transform .3s,box-shadow .3s;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;background:#f5df88;
+  transform:translateX(-101%);transition:transform .4s cubic-bezier(.16,1,.3,1);
+}
+.btn:hover::before{transform:translateX(0)}
+.btn:hover{transform:translateY(-3px);box-shadow:0 14px 44px rgba(200,168,75,.4)}
+.btn span,.btn svg{position:relative;z-index:1}
+
+/* book */
+.book{position:relative;width:200px}
+.book-glow{
+  position:absolute;inset:-50px -30px;pointer-events:none;
+  background:radial-gradient(ellipse at 55% 50%,rgba(200,168,75,.26) 0%,transparent 65%);
+  animation:glowP 3.5s ease-in-out infinite;
+}
+@keyframes glowP{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+
+.book-spine{
+  position:absolute;left:-14px;top:3%;bottom:3%;width:14px;
+  background:linear-gradient(to right,#1a1200,#5a3e0e);
+  transform:perspective(700px) rotateY(-68deg);transform-origin:right center;
+  box-shadow:-5px 10px 24px rgba(0,0,0,.8);
+}
+.book-cover{
+  width:100%;display:block;border-radius:2px;
+  transform:perspective(800px) rotateY(-10deg) rotateX(2deg);
+  box-shadow:-14px 22px 60px rgba(0,0,0,.9),0 0 0 1px rgba(200,168,75,.2);
+  animation:bookFloat 5s ease-in-out infinite;
+}
+@keyframes bookFloat{
+  0%,100%{transform:perspective(800px) rotateY(-10deg) rotateX(2deg) translateY(0)}
+  50%{transform:perspective(800px) rotateY(-10deg) rotateX(2deg) translateY(-10px)}
+}
+.book:hover .book-cover{
+  transform:perspective(800px) rotateY(0) rotateX(0) scale(1.04) translateY(-6px) !important;
+  animation:none;
+  box-shadow:-4px 34px 80px rgba(0,0,0,.85),0 0 60px rgba(200,168,75,.22);
+}
+.badge{
+  position:absolute;top:-12px;right:-12px;
+  width:62px;height:62px;border-radius:50%;
+  background:conic-gradient(#b82a18,#c8a84b,#b82a18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.37rem;font-weight:700;letter-spacing:.04em;text-align:center;
+  color:#fff;text-transform:uppercase;line-height:1.6;
+  animation:spin 14s linear infinite;
+  box-shadow:0 4px 18px rgba(184,42,24,.6);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════
+   SLIDE 1 — ПРО КНИГУ
+═══════════════════════════════ */
+.s1-inner{max-width:800px;width:100%}
+
+.slide-label{
+  font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;
+  color:#c8a84b;margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.slide-label::before{content:'';width:22px;height:1px;background:#c8a84b}
+
+.s1-title{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;line-height:1.05;margin-bottom:32px}
+.s1-title .gold{
+  background:linear-gradient(100deg,#c8a84b,#f5df88);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.quote{
+  border-left:3px solid #c8a84b;
+  padding:18px 24px;
+  background:rgba(200,168,75,.06);
+  margin-bottom:32px;
+  font-size:.95rem;line-height:1.85;
+  color:rgba(232,228,216,.75);
+  font-style:italic;
+}
+
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{
+  padding:18px;
+  border:1px solid rgba(200,168,75,.15);
+  background:rgba(255,255,255,.02);
+  display:flex;gap:14px;align-items:flex-start;
+  transition:border-color .3s,background .3s;
+}
+.card:hover{border-color:rgba(200,168,75,.35);background:rgba(200,168,75,.04)}
+.card-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.card-title{font-size:.75rem;font-weight:700;letter-spacing:.03em;margin-bottom:4px}
+.card-desc{font-size:.75rem;color:rgba(232,228,216,.45);line-height:1.6}
+
+/* stagger for s1 cards */
+.card:nth-child(1){animation:up .6s .1s cubic-bezier(.16,1,.3,1) both paused}
+.card:nth-child(2){animation:up .6s .2s cubic-bezier(.16,1,.3,1) both paused}
+.card:nth-child(3){animation:up .6s .3s cubic-bezier(.16,1,.3,1) both paused}
+.card:nth-child(4){animation:up .6s .4s cubic-bezier(.16,1,.3,1) both paused}
+.slide.active .card{animation-play-state:running}
+
+/* ═══════════════════════════════
+   SLIDE 2 — АВТОР
+═══════════════════════════════ */
+.s2-inner{max-width:700px;width:100%;display:flex;flex-direction:column;gap:0}
+
+.author-card{
+  display:flex;gap:36px;align-items:center;
+  padding:36px;
+  border:1px solid rgba(200,168,75,.18);
+  background:rgba(14,17,24,.8);
+  margin-bottom:28px;
+}
+.author-av{
+  width:90px;height:90px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#c8a84b,#b82a18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:900;color:#07090d;
+  box-shadow:0 0 0 3px rgba(200,168,75,.2),0 0 36px rgba(200,168,75,.15);
+}
+.author-name{font-size:1.1rem;font-weight:900;margin-bottom:6px}
+.author-role{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#c8a84b;margin-bottom:12px}
+.author-bio{font-size:.84rem;line-height:1.8;color:rgba(232,228,216,.6)}
+
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{
+  display:flex;gap:20px;align-items:flex-start;
+  padding:16px 0;border-bottom:1px solid rgba(200,168,75,.08);
+}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:#c8a84b;flex-shrink:0;margin-top:5px;
+  box-shadow:0 0 10px rgba(200,168,75,.5);
+}
+.tl-year{font-size:.7rem;letter-spacing:.1em;color:#c8a84b;font-weight:700;width:40px;flex-shrink:0;margin-top:3px}
+.tl-text{font-size:.82rem;line-height:1.7;color:rgba(232,228,216,.6)}
+
+.slide.active .tl-item:nth-child(1){animation:up .6s .1s cubic-bezier(.16,1,.3,1) both}
+.slide.active .tl-item:nth-child(2){animation:up .6s .25s cubic-bezier(.16,1,.3,1) both}
+.slide.active .tl-item:nth-child(3){animation:up .6s .4s cubic-bezier(.16,1,.3,1) both}
+
+/* ═══════════════════════════════
+   SLIDE 3 — КУПИТИ
+═══════════════════════════════ */
+.s3-inner{max-width:560px;width:100%;text-align:center}
+
+.s3-title{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:900;line-height:1.05;margin-bottom:12px}
+.s3-title .gold{
+  background:linear-gradient(100deg,#c8a84b,#f5df88);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.s3-sub{font-size:.78rem;color:rgba(232,228,216,.4);letter-spacing:.06em;margin-bottom:44px}
+
+.price-wrap{
+  padding:40px;
+  border:1px solid rgba(200,168,75,.2);
+  background:rgba(14,17,24,.9);
+  position:relative;overflow:hidden;
+  margin-bottom:0;
+}
+.price-wrap::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#b82a18,#c8a84b,#f5df88,#c8a84b,#b82a18);
+  background-size:200%;
+  animation:shimmer 3s linear infinite;
+}
+@keyframes shimmer{from{background-position:0%}to{background-position:200%}}
+
+.price{
+  font-size:3.2rem;font-weight:900;
+  background:linear-gradient(100deg,#c8a84b,#f5df88);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:4px;
+}
+.price-label{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,228,216,.3);margin-bottom:32px}
+
+.buy-btn{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;color:#07090d;background:#c8a84b;
+  padding:18px 40px;width:100%;
+  position:relative;overflow:hidden;
+  transition:transform .3s,box-shadow .3s;
+}
+.buy-btn::before{
+  content:'';position:absolute;inset:0;background:#f5df88;
+  transform:translateX(-101%);transition:transform .4s cubic-bezier(.16,1,.3,1);
+}
+.buy-btn:hover::before{transform:translateX(0)}
+.buy-btn:hover{transform:translateY(-3px);box-shadow:0 16px 50px rgba(200,168,75,.45)}
+.buy-btn span,.buy-btn svg{position:relative;z-index:1}
+
+.buy-perks{
+  display:flex;justify-content:center;gap:28px;
+  margin-top:24px;padding-top:20px;
+  border-top:1px solid rgba(200,168,75,.1);
+}
+.perk{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(232,228,216,.35);display:flex;flex-direction:column;align-items:center;gap:5px}
+.perk-icon{font-size:1.1rem}
+
+/* ═══════════════════════════════
+   RESPONSIVE
+═══════════════════════════════ */
+@media(max-width:600px){
+  html,body{overflow:auto}
+  .slide{position:relative;opacity:1;pointer-events:all;min-height:100vh;padding:60px 5vw 80px}
+  .slides{height:auto}
+  .s0-inner{flex-direction:column;gap:36px}
+  .s0-right{order:-1}
+  .book{width:150px}
+  h1{font-size:2.1rem}
+  .cards{grid-template-columns:1fr}
+  .author-card{flex-direction:column;text-align:center}
+  .dots{display:none}
+  .arrow{display:none}
+  .slide-num{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- bg -->
+<div class="bg">
+  <div class="bg-color"></div>
+  <div class="bg-glow s0" id="bgGlow"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<!-- dots -->
+<nav class="dots" id="dots"></nav>
+
+<!-- slide number -->
+<div class="slide-num" id="slideNum">01 / 04</div>
+
+<!-- arrows -->
+<div class="arrow">
+  <button class="arr-btn" id="btnPrev">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  </button>
+  <button class="arr-btn" id="btnNext">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<!-- progress -->
+<div class="progress"><div class="progress-fill" id="pbar"></div></div>
+
+<!-- ══════════ SLIDES ══════════ -->
+<div class="slides">
+
+  <!-- SLIDE 0: HERO -->
+  <div class="slide active" data-i="0">
+    <div class="s0-inner">
+      <div class="s0-left">
+        <p class="eyebrow anim a-eyebrow">Книга, яку я люблю</p>
+        <p class="who anim a-who">Костя Кучерук · 8-й клас</p>
+        <h1 class="anim a-h1">Острів<span class="gold">ГУР</span></h1>
+        <p class="sub-tag anim a-sub">Таємниці · Операції · Війна</p>
+        <div class="divider anim a-line" style="width:44px"></div>
+        <p class="desc anim a-desc">Документальна книга Максима Бутченка про українську воєнну розвідку. Реальні спецоперації, морські дрони, бої за Гостомель і удари на 2&thinsp;000+ км.</p>
+        <a href="#" onclick="goTo(3);return false" class="btn anim a-btn">
+          <span>Дізнатись більше</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="s0-right">
+        <div class="book anim a-book">
+          <div class="book-glow"></div>
+          <div class="book-spine"></div>
+          <svg class="book-cover" viewBox="0 0 210 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="cvBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1400"/><stop offset="100%" stop-color="#0c0b04"/></linearGradient>
+              <linearGradient id="cvGold" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c8a84b"/><stop offset="100%" stop-color="#f0d070"/></linearGradient>
+              <linearGradient id="cvBar" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#b82a18"/><stop offset="50%" stop-color="#c8a84b"/><stop offset="100%" stop-color="#b82a18"/></linearGradient>
+              <filter id="cvBlur"><feGaussianBlur stdDeviation="10"/></filter>
+            </defs>
+            <rect width="210" height="300" fill="url(#cvBg)"/>
+            <line x1="0" y1="58" x2="210" y2="58" stroke="rgba(200,168,75,.07)" stroke-width="1"/>
+            <line x1="0" y1="242" x2="210" y2="242" stroke="rgba(200,168,75,.07)" stroke-width="1"/>
+            <rect x="0" y="0" width="210" height="5" fill="url(#cvBar)"/>
+            <ellipse cx="105" cy="148" rx="75" ry="88" fill="rgba(200,168,75,.07)" filter="url(#cvBlur)"/>
+            <path d="M105 65 L140 83 L140 122 Q140 150 105 162 Q70 150 70 122 L70 83 Z" fill="none" stroke="url(#cvGold)" stroke-width="1.3" opacity=".7"/>
+            <path d="M105 73 L132 88 L132 120 Q132 142 105 153 Q78 142 78 120 L78 88 Z" fill="rgba(200,168,75,.06)" stroke="rgba(200,168,75,.28)" stroke-width=".6"/>
+            <g transform="translate(105,111)" fill="none" stroke="url(#cvGold)" stroke-width="1.5" stroke-linecap="round">
+              <line x1="0" y1="-28" x2="0" y2="10"/>
+              <line x1="-10" y1="-20" x2="-10" y2="-12"/>
+              <line x1="10" y1="-20" x2="10" y2="-12"/>
+              <path d="M-11,-28 Q-11,-33 -5.5,-33 Q0,-33 0,-28"/>
+              <path d="M11,-28 Q11,-33 5.5,-33 Q0,-33 0,-28"/>
+              <line x1="0" y1="-28" x2="0" y2="-36"/>
+              <line x1="-14" y1="10" x2="14" y2="10"/>
+            </g>
+            <text x="105" y="178" text-anchor="middle" font-family="system-ui,sans-serif" font-size="21" font-weight="900" letter-spacing="4" fill="url(#cvGold)">ОСТРІВ</text>
+            <text x="105" y="208" text-anchor="middle" font-family="system-ui,sans-serif" font-size="37" font-weight="900" letter-spacing="9" fill="url(#cvGold)">ГУР</text>
+            <line x1="52" y1="219" x2="158" y2="219" stroke="rgba(200,168,75,.38)" stroke-width=".8"/>
+            <text x="105" y="232" text-anchor="middle" font-family="system-ui,sans-serif" font-size="6.2" letter-spacing="2.5" fill="rgba(200,168,75,.6)">ТАЄМНИЦІ · ОПЕРАЦІЇ · ВІЙНА</text>
+            <text x="105" y="258" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.5" letter-spacing="2" fill="rgba(200,168,75,.45)">МАКСИМ БУТЧЕНКО</text>
+            <text x="105" y="286" text-anchor="middle" font-family="system-ui,sans-serif" font-size="5.5" letter-spacing="1.5" fill="rgba(200,168,75,.28)">YAKABOO PUBLISHING · 2025</text>
+            <rect x="0" y="295" width="210" height="5" fill="url(#cvBar)" opacity=".6"/>
+            <rect x="0" y="0" width="210" height="300" fill="none" stroke="rgba(200,168,75,.18)" stroke-width="1"/>
+            <rect x="4" y="4" width="202" height="292" fill="none" stroke="rgba(200,168,75,.07)" stroke-width=".5"/>
+          </svg>
+          <div class="badge">Бест<br>селер<br>2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: ПРО КНИГУ -->
+  <div class="slide" data-i="1">
+    <div class="s1-inner">
+      <p class="slide-label anim a-eyebrow">Про книгу</p>
+      <h2 class="s1-title anim a-h1">Невидимий фронт<br><span class="gold">відкриває таємниці</span></h2>
+      <div class="quote anim a-desc">
+        «Унікальна можливість побачити те, що зазвичай приховано від суспільства. У цих голосах — правда невидимого фронту, його ризики, втрати й неймовірна сміливість.»
+      </div>
+      <div class="cards">
+        <div class="card anim">
+          <div class="card-icon">🛸</div>
+          <div><div class="card-title">Перший безпілотний флот</div><div class="card-desc">Як Україна створила революційну зброю та змінила хід війни</div></div>
+        </div>
+        <div class="card anim">
+          <div class="card-icon">🚤</div>
+          <div><div class="card-title">Морські дрони MAGURA</div><div class="card-desc">Спеціальні операції на морі, що приголомшили весь світ</div></div>
+        </div>
+        <div class="card anim">
+          <div class="card-icon">🎯</div>
+          <div><div class="card-title">Удари на 2000+ км</div><div class="card-desc">Високоточні операції глибоко на території ворога</div></div>
+        </div>
+        <div class="card anim">
+          <div class="card-icon">🏡</div>
+          <div><div class="card-title">Бої за Гостомель</div><div class="card-desc">Закриті деталі однієї з найважливіших битв оборони Києва</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: АВТОР -->
+  <div class="slide" data-i="2">
+    <div class="s2-inner">
+      <p class="slide-label anim a-eyebrow">Автор</p>
+      <div class="author-card anim a-h1">
+        <div class="author-av">МБ</div>
+        <div>
+          <div class="author-name">Максим Бутченко</div>
+          <div class="author-role">Журналіст · Письменник</div>
+          <div class="author-bio">Народився 1977 року в Луганській області. Український журналіст і письменник, автор книг видавництва Yakaboo Publishing. Поєднує точність журналіста з майстерністю оповідача.</div>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item anim">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2014</div>
+          <div class="tl-text">Початок документування подій російсько-української війни. Перші репортажі з гарячих точок.</div>
+        </div>
+        <div class="tl-item anim">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2022</div>
+          <div class="tl-text">Повномасштабне вторгнення — Бутченко продовжує роботу, збираючи свідчення розвідників і командирів.</div>
+        </div>
+        <div class="tl-item anim">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2025</div>
+          <div class="tl-text">Вихід книги «Острів ГУР» з передмовою генерала Кирила Буданова. Миттєвий бестселер.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: КУПИТИ -->
+  <div class="slide" data-i="3">
+    <div class="s3-inner">
+      <h2 class="s3-title anim a-h1">Придбати<br><span class="gold">книгу</span></h2>
+      <p class="s3-sub anim a-sub">Доступна на Yakaboo — найбільшому книжковому магазині України</p>
+      <div class="price-wrap anim a-desc">
+        <div class="price">370 ₴</div>
+        <div class="price-label">Орієнтовна ціна · Yakaboo</div>
+        <a href="https://www.yakaboo.ua/ua/ostriv-gur-taemnici-operacii-vijna.html" target="_blank" rel="noopener" class="buy-btn">
+          <span>Перейти на Yakaboo та купити</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <div class="buy-perks">
+          <div class="perk"><span class="perk-icon">🚚</span>Швидка доставка</div>
+          <div class="perk"><span class="perk-icon">📦</span>Безпечно</div>
+          <div class="perk"><span class="perk-icon">🇺🇦</span>Українське</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /slides -->
+
+<script>
+const TOTAL = 4;
+let cur = 0;
+let transitioning = false;
+
+const slides = document.querySelectorAll('.slide');
+const bgGlow = document.getElementById('bgGlow');
+const pbar   = document.getElementById('pbar');
+const slideNum = document.getElementById('slideNum');
+const dotsEl = document.getElementById('dots');
+
+// build dots
+for(let i=0;i<TOTAL;i++){
+  const d = document.createElement('button');
+  d.className = 'dot' + (i===0?' on':'');
+  d.addEventListener('click',()=>goTo(i));
+  dotsEl.appendChild(d);
+}
+
+function goTo(n){
+  if(n===cur || transitioning) return;
+  transitioning = true;
+
+  const prev = cur;
+  cur = n;
+
+  // cross-fade
+  const outSlide = slides[prev];
+  const inSlide  = slides[cur];
+
+  outSlide.style.transition = 'opacity .55s cubic-bezier(.4,0,.2,1)';
+  outSlide.style.opacity = '0';
+  outSlide.style.pointerEvents = 'none';
+
+  // reset animations on incoming slide
+  inSlide.querySelectorAll('.anim').forEach(el=>{
+    el.style.animation = 'none';
+    void el.offsetWidth; // reflow
+    el.style.animation = '';
+  });
+
+  inSlide.style.transition = 'none';
+  inSlide.style.opacity = '0';
+  inSlide.classList.add('active');
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      inSlide.style.transition = 'opacity .6s cubic-bezier(.4,0,.2,1)';
+      inSlide.style.opacity = '1';
+    });
+  });
+
+  setTimeout(()=>{
+    outSlide.classList.remove('active');
+    outSlide.style.transition = '';
+    outSlide.style.opacity = '';
+    transitioning = false;
+  }, 650);
+
+  // bg glow swap
+  bgGlow.className = 'bg-glow s'+cur;
+
+  // dots
+  dotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+
+  // progress
+  pbar.style.width = ((cur+1)/TOTAL*100)+'%';
+
+  // num
+  slideNum.textContent = String(cur+1).padStart(2,'0') + ' / ' + String(TOTAL).padStart(2,'0');
+}
+
+window.goTo = goTo;
+
+document.getElementById('btnNext').addEventListener('click',()=>goTo((cur+1)%TOTAL));
+document.getElementById('btnPrev').addEventListener('click',()=>goTo((cur-1+TOTAL)%TOTAL));
+
+// keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') goTo((cur+1)%TOTAL);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')    goTo((cur-1+TOTAL)%TOTAL);
+});
+
+// touch swipe
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=tx-e.changedTouches[0].clientX;
+  const dy=ty-e.changedTouches[0].clientY;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
+    dx>0?goTo((cur+1)%TOTAL):goTo((cur-1+TOTAL)%TOTAL);
+  }
+});
+
+// init progress
+pbar.style.width = (1/TOTAL*100)+'%';
+</script>
+</body>
+</html>
