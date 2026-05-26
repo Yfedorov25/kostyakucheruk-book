@@ -46,7 +46,7 @@ html,body{height:100%;overflow:hidden;background:#07090d;color:#e8e4d8;font-fami
   background:rgba(200,168,75,.3);border:none;cursor:pointer;
   transition:background .4s,transform .4s;padding:0;
 }
-.dot.on{background:#c8a84b;transform:scale(1.5)}
+.dot.on{background:#c8a84b;transform:scale(1.6)}
 
 /* ── PROGRESS BAR ── */
 .progress{
@@ -165,7 +165,7 @@ h1 .gold{
 }
 @keyframes bookFloat{
   0%,100%{transform:perspective(800px) rotateY(-10deg) rotateX(2deg) translateY(0)}
-  50%{transform:perspective(800px) rotateY(-10deg) rotateX(2deg) translateY(-10px)}
+  50%{transform:perspective(800px) rotateY(-10deg) rotateX(2deg) translateY(-12px)}
 }
 .book:hover .book-cover{
   transform:perspective(800px) rotateY(0) rotateX(0) scale(1.04) translateY(-6px) !important;
@@ -335,19 +335,22 @@ h1 .gold{
 /* ═══════════════════════════════
    RESPONSIVE
 ═══════════════════════════════ */
-@media(max-width:600px){
-  html,body{overflow:auto}
-  .slide{position:relative;opacity:1;pointer-events:all;min-height:100vh;padding:60px 5vw 80px}
-  .slides{height:auto}
+@media(max-width:640px){
+  html,body{overflow:auto;height:auto}
+  .slide{position:relative;opacity:1 !important;pointer-events:all !important;transform:none !important;min-height:100vh;padding:60px 6vw 80px;align-items:flex-start}
+  .slides{height:auto;overflow:visible}
   .s0-inner{flex-direction:column;gap:36px}
   .s0-right{order:-1}
-  .book{width:150px}
-  h1{font-size:2.1rem}
+  .book{width:160px}
+  h1{font-size:2.2rem}
   .cards{grid-template-columns:1fr}
   .author-card{flex-direction:column;text-align:center}
-  .dots{display:none}
-  .arrow{display:none}
-  .slide-num{display:none}
+  .dots,.arrow,.slide-num,.progress{display:none !important}
+
+  /* reveal-on-scroll: анімації стартують лише коли слайд у полі зору */
+  .slide.in-view .anim,
+  .slide.in-view .card,
+  .slide.in-view .tl-item{animation-play-state:running !important}
 }
 </style>
 </head>
@@ -391,8 +394,8 @@ h1 .gold{
         <h1 class="anim a-h1">Острів<span class="gold">ГУР</span></h1>
         <p class="sub-tag anim a-sub">Таємниці · Операції · Війна</p>
         <div class="divider anim a-line" style="width:44px"></div>
-        <p class="desc anim a-desc">Документальна книга Максима Бутченка про українську воєнну розвідку. Реальні спецоперації, морські дрони, бої за Гостомель і удари на 2&thinsp;000+ км.</p>
-        <a href="#" onclick="goTo(3);return false" class="btn anim a-btn">
+        <p class="desc anim a-desc">Документальна книга Максима Бутченка про українську воєнну розвідку. Реальні спецоперації, морські дрони, бої за Гостомель і удари на 2&thinsp;000+ км — очима тих, хто це робив.</p>
+        <a href="#" onclick="goTo(1);return false" class="btn anim a-btn">
           <span>Дізнатись більше</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
@@ -620,6 +623,25 @@ document.addEventListener('touchend',e=>{
 
 // init progress
 pbar.style.width = (1/TOTAL*100)+'%';
+
+// ── MOBILE: reveal slides on scroll ──
+// На десктопі слайди абсолютні й керуються .active; на мобільному вони
+// йдуть вертикальним скролом, тож появу елементів вмикаємо при вході в екран.
+const mqMobile = window.matchMedia('(max-width:640px)');
+let io = null;
+function setupMobileReveal(){
+  if(mqMobile.matches && !io){
+    io = new IntersectionObserver(entries=>{
+      entries.forEach(en=>{ if(en.isIntersecting) en.target.classList.add('in-view'); });
+    }, {threshold:.15});
+    slides.forEach(s=>io.observe(s));
+  } else if(!mqMobile.matches && io){
+    io.disconnect(); io = null;
+    slides.forEach(s=>s.classList.remove('in-view'));
+  }
+}
+setupMobileReveal();
+mqMobile.addEventListener('change', setupMobileReveal);
 </script>
 </body>
 </html>
